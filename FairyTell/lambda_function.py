@@ -16,7 +16,7 @@ def tell_story(story_name):
 
 # pick a random story to tell
 def tell_random_story():
-    # get available stories from S3 'fairytell' bucket
+    # get available stories in S3 'fairytell' bucket
     import boto3
     s3 = boto3.client('s3')
 
@@ -32,7 +32,8 @@ def tell_random_story():
     # remove the file extension
     import re
     story_name = re.sub(r".txt", '', filename)
-        
+
+    # read story content
     data = s3.get_object(Bucket="fairytell", Key=filename)
     story_text = data['Body'].read()
         
@@ -59,10 +60,8 @@ def build_response(message):
     response['response'] = message
     return response
 
-# produces speech and text output
-# text is displayed as a card
-# while speech is played aloud on speakers
-def statement(story_name, speech_text, image_url):
+# creates speech and text output
+def compile_speechlet(story_name, speech_text, image_url):
     speechlet = {}
     speechlet['outputSpeech'] = build_PlainSpeech(speech_text)
     speechlet['card'] = build_SimpleCard(story_name, image_url)
@@ -77,7 +76,7 @@ def intent_handler(event, context):
     intent_name = event['request']['intent']['name']
     if intent_name == "tell_story":
 
-        # check if the story name is specified in the intent
+        # if the story name is specified in the intent
         if event['request']['intent']['slots']['story'].has_key('value'):
             story_name_raw = event['request']['intent']['slots']['story']['value']
 
@@ -96,9 +95,11 @@ def intent_handler(event, context):
             (story_name, speech_text) = tell_random_story()
             
         image_url = "https://s3.amazonaws.com/fairytell/Images/" + story_name + ".jpg"
-        return statement(story_name, speech_text, image_url)
+        return compile_speechlet(story_name, speech_text, image_url)
+
+    # intent not recognized
     else:
-        return statement("Sorry", "Sorry, I couldn't understand. Please try again..", "")
+        return compile_speechlet("Sorry", "Sorry, I couldn't understand. Please try again..", "")
 
 
 #####               Main Function for Event Handling        #####
