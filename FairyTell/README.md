@@ -1,6 +1,8 @@
 
 Fairy Tell: A Story Teller Bot for Alexa Echo Devices to Read Your Favorite Bedtime Stories
 
+The bot fetches stories from Wikipedia pages of famous Walt Disney Classics
+
 Directory Includes:
 
 	lambda_function.py: AWS Lambda Function to handle "Tell Story" Intent.
